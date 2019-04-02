@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:task="http://www.springframework.org/schema/task"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <context:component-scan base-package="com.chn.energy"></context:component-scan>
+
+    <context:property-placeholder location="classpath:jdbc.properties" />
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+
+
+        <property name="initialSize" value="${ds.initialSize}"/>
+        <property name="minIdle" value="${ds.minIdle}"/>
+        <property name="maxActive" value="${ds.maxActive}"/>
+
+
+        <property name="maxWait" value="${ds.maxWait}"/>
+
+
+        <property name="timeBetweenEvictionRunsMillis" value="${ds.timeBetweenEvictionRunsMillis}"/>
+
+
+        <property name="minEvictableIdleTimeMillis" value="${ds.minEvictableIdleTimeMillis}"/>
+
+        <property name="validationQuery" value="SELECT 'x'"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testOnReturn" value="false"/>
+
+
+        <property name="filters" value="stat"/>
+    </bean>
+
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean" p:dataSource-ref="dataSource"
+          p:mapperLocations="classpath:mapper/*.xml" />
+
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer" p:basePackage="com.chn.energy.dao"
+          p:sqlSessionFactoryBeanName="sqlSessionFactory"/>
+
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    <!-- enable transaction annotation support -->
+    <tx:annotation-driven transaction-manager="txManager" />
+
+    <!--<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">-->
+        <!--<constructor-arg index="0" ref="sqlSessionFactory" />-->
+    <!--</bean>-->
+
+    <task:scheduled-tasks>
+        <task:scheduled ref="planStatusJob" method="scanTimeOutPlan" cron="0 * * * * ?"/>
+    </task:scheduled-tasks>
+</beans>

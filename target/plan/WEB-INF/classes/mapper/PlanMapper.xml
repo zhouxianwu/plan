@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.chn.energy.dao.PlanMapper" >
+
+  <sql id="Base_Column_List" >
+    planId, planName, planContent, creator, plan.deptId, urgency, status, plan.createTime, plan.updateTime,
+    startTime, endTime
+  </sql>
+
+    <!-- 查询列表 -->
+    <select id="queryList" parameterType="map" resultType="com.chn.energy.model.Plan">
+        select
+        <include refid="Base_Column_List" />,
+        plan_user.realName as creatorName,plan_dept.name as deptName
+        from plan left join plan_user on
+        plan.creator = plan_user.id
+        left join plan_dept on
+        plan.deptId = plan_dept.id
+        where 1=1
+        <if test="deptId != null and deptId !='' ">
+            and plan.deptId = #{deptId}
+        </if>
+        <if test="creatorName != null and creatorName !=''">
+            and plan_user.realName like concat('%',#{creatorName},'%')
+        </if>
+        <if test="planName != null and planName !=''">
+            and plan_user.planName like concat('%',#{planName},'%')
+        </if>
+        <if test="urgency != null and urgency !=''">
+            and urgency = #{urgency}
+        </if>
+        <if test="status != null and status !=''">
+            and status = #{status}
+        </if>
+        <if test="startSTime != null and startSTime !=''">
+            and plan.startTime &gt;= #{startSTime}
+        </if>
+        <if test="endSTime != null and endSTime !=''">
+            and plan.startTime &lt;  #{endSTime}
+        </if>
+        <if test="startETime != null and startETime !=''">
+            and plan.endTime &gt;= #{startETime}
+        </if>
+        <if test="endETime != null and endETime !=''">
+            and plan.endTime &lt;  #{endETime}
+        </if>
+        <if test="begin != null">
+            limit ${begin},${length}
+        </if>
+    </select>
+
+    <select id="count" parameterType="map" resultType="java.lang.Integer">
+        select count(1)
+        from plan left join plan_user on
+        plan.creator = plan_user.id
+        left join plan_dept on
+        plan.deptId = plan_dept.id
+        where 1=1
+        <if test="deptId != null and deptId !='' ">
+            and plan.deptId = #{deptId}
+        </if>
+        <if test="creatorName != null and creatorName !=''">
+            and plan_user.realName like concat('%',#{creatorName},'%')
+        </if>
+        <if test="urgency != null and urgency !=''">
+            and urgency = #{urgency}
+        </if>
+        <if test="status != null and status !=''">
+            and status = #{status}
+        </if>
+        <if test="startSTime != null and startSTime !=''">
+            and plan.startTime &gt;= #{startSTime}
+        </if>
+        <if test="endSTime != null and endSTime !=''">
+            and plan.startTime &lt;  #{endSTime}
+        </if>
+        <if test="startETime != null and startETime !=''">
+            and plan.endTime &gt;= #{startETime}
+        </if>
+        <if test="endETime != null and endETime !=''">
+            and plan.endTime &lt;  #{endETime}
+        </if>
+    </select>
+
+    <select id="selectById" resultType="com.chn.energy.model.Plan" parameterType="java.lang.Integer" >
+        select
+        <include refid="Base_Column_List" />,
+        plan_user.realName as creatorName,plan_dept.name as deptName
+        from plan left join plan_user on
+        plan.creator = plan_user.id
+        left join plan_dept on
+        plan.deptId = plan_dept.id
+        where plan.planId = #{id,jdbcType=INTEGER}
+    </select>
+
+  <delete id="delete" parameterType="java.lang.Integer" >
+    delete from plan
+    where planId = #{planId,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.chn.energy.model.Plan" >
+    insert into plan (planId, planName, planContent, 
+      creator, deptId, urgency,
+      status, createTime, updateTime, 
+      startTime, endTime)
+    values (#{planId,jdbcType=INTEGER}, #{planName,jdbcType=VARCHAR}, #{planContent,jdbcType=VARCHAR}, 
+      #{creator,jdbcType=INTEGER}, #{deptId,jdbcType=INTEGER}, #{urgency,jdbcType=INTEGER},
+      #{status,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
+      #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP})
+  </insert>
+
+  <update id="update" parameterType="com.chn.energy.model.Plan" >
+    update plan
+    <set >
+      <if test="planName != null" >
+        planName = #{planName,jdbcType=VARCHAR},
+      </if>
+      <if test="planContent != null" >
+        planContent = #{planContent,jdbcType=VARCHAR},
+      </if>
+      <if test="creator != null" >
+        creator = #{creator,jdbcType=INTEGER},
+      </if>
+      <if test="deptId != null" >
+        deptId = #{deptId,jdbcType=INTEGER},
+      </if>
+      <if test="urgency != null" >
+          urgency = #{urgency,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="startTime != null" >
+        startTime = #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        endTime = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where planId = #{planId,jdbcType=INTEGER}
+  </update>
+
+</mapper>
